@@ -1,0 +1,27 @@
+{
+  "name": "",
+  "version": "",
+  "private": true,
+  "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/eslint-parser": "^7.25.9",
+    "@babel/preset-env": "^7.26.0",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
+    "eslint-plugin-vue": "^9.32.0"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "echarts": "^5.5.1",
+    "element-plus": "^2.9.0",
+    "monaco-editor": "^0.36.1",
+    "vue": "^3.3.0",
+    "vue-router": "^4.5.0"
+  },
+  "scripts": {
+    "serve": "vue-cli-service serve"
+  },
+  "readme": "ERROR: No README data found!",
+  "_id": "@"
+}
