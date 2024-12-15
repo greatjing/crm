@@ -13,32 +13,26 @@
         <el-input v-model="form.description" type="textarea" placeholder="请输入策略描述" />
       </el-form-item>
       
-      <el-form-item label="SQL代码" prop="sqlCode">
-        <div class="editor-container">
+      <el-form-item label="SQL代码" prop="sqlCode" class="code-editor-item">
+        <div class="editor-wrapper">
           <MonacoEditor
             v-model="form.sqlCode"
             language="sql"
-            :options="editorOptions"
-            @save="handleSave"
           />
         </div>
         <div class="editor-tips">
-          <el-tag size="small">按 Ctrl+S (Mac: Cmd+S) 保存</el-tag>
           <el-tag size="small" type="info">支持 SQL 代码提示</el-tag>
         </div>
       </el-form-item>
       
-      <el-form-item label="Python代码" prop="pythonCode">
-        <div class="editor-container">
+      <el-form-item label="Python代码" prop="pythonCode" class="code-editor-item">
+        <div class="editor-wrapper">
           <MonacoEditor
             v-model="form.pythonCode"
             language="python"
-            :options="editorOptions"
-            @save="handleSave"
           />
         </div>
         <div class="editor-tips">
-          <el-tag size="small">按 Ctrl+S (Mac: Cmd+S) 保存</el-tag>
           <el-tag size="small" type="info">支持 Python 代码提示</el-tag>
         </div>
       </el-form-item>
@@ -83,17 +77,6 @@ const rules = {
   pythonCode: [
     { required: true, message: '请输入Python代码', trigger: 'blur' }
   ]
-}
-
-const editorOptions = {
-  theme: 'customTheme',
-  minimap: { enabled: false },
-  scrollBeyondLastLine: false,
-  fontSize: 14,
-  automaticLayout: true,
-  tabSize: 4,
-  formatOnPaste: true,
-  formatOnType: true
 }
 
 const isEdit = computed(() => route.params.id !== undefined)
@@ -143,23 +126,36 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
+<style>
 .strategy-edit {
   padding: 20px;
 }
+
 .header {
   margin-bottom: 20px;
 }
-.editor-container {
-  height: 300px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
+
+.code-editor-item {
+  margin-bottom: 22px;
 }
+
+.code-editor-item :deep(.el-form-item__content) {
+  height: auto;
+}
+
+.editor-wrapper {
+  height: 300px;
+  background-color: #1e1e1e;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
 .editor-tips {
   margin-top: 8px;
   display: flex;
   gap: 8px;
 }
+
 .el-tag {
   font-size: 12px;
 }

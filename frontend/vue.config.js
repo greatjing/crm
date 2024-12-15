@@ -4,9 +4,8 @@ module.exports = {
   configureWebpack: {
     plugins: [
       new MonacoWebpackPlugin({
-        languages: ['javascript', 'python', 'sql'],
-        features: ['!gotoSymbol']
+        languages: ['python', 'sql']
       })
     ]
   }
-} 
+}
