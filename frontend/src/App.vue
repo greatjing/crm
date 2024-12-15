@@ -28,6 +28,7 @@
 
 <script>
 import { Document } from '@element-plus/icons-vue'
+import 'element-plus/dist/index.css'
 
 export default {
   name: 'App',
@@ -38,6 +39,12 @@ export default {
 </script>
 
 <style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
 .app-container {
   height: 100vh;
 }
