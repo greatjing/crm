@@ -13,27 +13,31 @@
         <el-input v-model="form.description" type="textarea" placeholder="请输入策略描述" />
       </el-form-item>
       
-      <el-form-item label="SQL代码" prop="sqlCode" class="code-editor-item">
+      <el-form-item label="SQL代码" prop="sql_code" class="code-editor-item">
         <div class="editor-wrapper">
           <MonacoEditor
-            v-model="form.sqlCode"
+            v-if="isDataReady"
+            v-model="form.sql_code"
             language="sql"
           />
         </div>
         <div class="editor-tips">
           <el-tag size="small" type="info">支持 SQL 代码提示</el-tag>
+          <el-button size="small" type="primary" @click="insertSqlTemplate">插入SQL模板</el-button>
         </div>
       </el-form-item>
       
-      <el-form-item label="Python代码" prop="pythonCode" class="code-editor-item">
+      <el-form-item label="Python代码" prop="python_code" class="code-editor-item">
         <div class="editor-wrapper">
           <MonacoEditor
-            v-model="form.pythonCode"
+            v-if="isDataReady"
+            v-model="form.python_code"
             language="python"
           />
         </div>
         <div class="editor-tips">
           <el-tag size="small" type="info">支持 Python 代码提示</el-tag>
+          <el-button size="small" type="primary" @click="insertPythonTemplate">插入Python模板</el-button>
         </div>
       </el-form-item>
       
@@ -55,12 +59,77 @@ import { strategyApi } from '@/api/strategy'
 const route = useRoute()
 const router = useRouter()
 const formRef = ref(null)
+const isDataReady = ref(false)
+
+const sqlTemplate = `-- 信贷风险评估SQL模板
+SELECT 
+    customer_id,
+    credit_score,
+    loan_amount,
+    CASE 
+        WHEN credit_score >= 700 THEN 'LOW'
+        WHEN credit_score >= 600 THEN 'MEDIUM'
+        ELSE 'HIGH'
+    END as risk_level
+FROM customer_credit_data
+WHERE application_date >= :start_date
+  AND application_date <= :end_date;`
+
+const pythonTemplate = `# 信贷风险评估Python模板
+def evaluate_credit_risk(data):
+    """
+    评估信贷风险
+    :param data: 包含客户信息的字典
+    :return: 风险评估结果
+    """
+    try:
+        # 提取关键指标
+        credit_score = data.get('credit_score', 0)
+        loan_amount = data.get('loan_amount', 0)
+        income = data.get('annual_income', 0)
+        
+        # 计算基础风险分数
+        risk_score = 0
+        
+        # 信用分数评估
+        if credit_score >= 700:
+            risk_score += 40
+        elif credit_score >= 600:
+            risk_score += 25
+        else:
+            risk_score += 10
+            
+        # 贷款金额与收入比评估
+        loan_to_income = loan_amount / income if income > 0 else float('inf')
+        if loan_to_income <= 0.3:
+            risk_score += 30
+        elif loan_to_income <= 0.5:
+            risk_score += 20
+        else:
+            risk_score += 10
+            
+        # 返回风险评估结果
+        return {
+            'risk_score': risk_score,
+            'risk_level': 'LOW' if risk_score >= 60 else 'MEDIUM' if risk_score >= 40 else 'HIGH',
+            'evaluation_factors': {
+                'credit_score': credit_score,
+                'loan_to_income_ratio': loan_to_income
+            }
+        }
+        
+    except Exception as e:
+        return {
+            'error': str(e),
+            'risk_level': 'ERROR'
+        }
+`
 
 const form = ref({
   name: '',
   description: '',
-  sqlCode: '',
-  pythonCode: ''
+  sql_code: '',
+  python_code: ''
 })
 
 const rules = {
@@ -71,15 +140,23 @@ const rules = {
   description: [
     { required: true, message: '请输入策略描述', trigger: 'blur' }
   ],
-  sqlCode: [
+  sql_code: [
     { required: true, message: '请输入SQL代码', trigger: 'blur' }
   ],
-  pythonCode: [
+  python_code: [
     { required: true, message: '请输入Python代码', trigger: 'blur' }
   ]
 }
 
 const isEdit = computed(() => route.params.id !== undefined)
+
+const insertSqlTemplate = () => {
+  form.value.sql_code = sqlTemplate
+}
+
+const insertPythonTemplate = () => {
+  form.value.python_code = pythonTemplate
+}
 
 const handleSave = async () => {
   if (!formRef.value) return
@@ -110,19 +187,24 @@ const cancel = () => {
 }
 
 const loadStrategy = async () => {
-  if (!isEdit.value) return
+  if (!isEdit.value) {
+    isDataReady.value = true
+    return
+  }
   
   try {
     const response = await strategyApi.getStrategy(route.params.id)
     form.value = response.data
+    console.log('Strategy loaded:', form.value)
+    isDataReady.value = true
   } catch (error) {
     ElMessage.error('加载策略失败：' + error.message)
     router.push('/strategy')
   }
 }
 
-onMounted(() => {
-  loadStrategy()
+onMounted(async () => {
+  await loadStrategy()
 })
 </script>
 
@@ -154,6 +236,7 @@ onMounted(() => {
   margin-top: 8px;
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .el-tag {
