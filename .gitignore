@@ -6,7 +6,6 @@ __pycache__/
 *$py.class
 *.so
 .Python
-env/
 build/
 develop-eggs/
 dist/
@@ -22,12 +21,22 @@ var/
 .installed.cfg
 *.egg
 venv/
+env/
+myenv/
 
 # Node
-frontend/node_modules/
-frontend/dist/
+node_modules/
+/dist/
+
+# Frontend specific
+frontend/node_modules
+frontend/dist
+frontend/.env
 frontend/.env.local
 frontend/.env.*.local
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
 
 # IDE
 .idea/
@@ -35,17 +44,6 @@ frontend/.env.*.local
 *.swp
 *.swo
 .DS_Store
-
-# Logs
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Local env files
-.env
-.env.local
-.env.*.local
 
 # Editor directories and files
 .idea
@@ -55,3 +53,25 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Local env files
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# System files
+.DS_Store
+Thumbs.db
