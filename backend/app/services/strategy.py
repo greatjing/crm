@@ -5,6 +5,11 @@ import json
 import subprocess
 import tempfile
 import os
+import logging
+
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def get_strategies(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Strategy).offset(skip).limit(limit).all()
@@ -13,13 +18,16 @@ def get_strategy(db: Session, strategy_id: int):
     return db.query(Strategy).filter(Strategy.id == strategy_id).first()
 
 def create_strategy(db: Session, strategy: StrategyCreate):
+    logger.info(f"Creating strategy with data: {strategy.dict()}")
     db_strategy = Strategy(**strategy.dict())
     db.add(db_strategy)
     db.commit()
     db.refresh(db_strategy)
+    logger.info(f"Created strategy: {db_strategy.id}, sql_code: {db_strategy.sql_code}, python_code: {db_strategy.python_code}")
     return db_strategy
 
 def update_strategy(db: Session, strategy_id: int, strategy: StrategyUpdate):
+    logger.info(f"Updating strategy {strategy_id} with data: {strategy.dict()}")
     db_strategy = get_strategy(db, strategy_id)
     if not db_strategy:
         return None
@@ -29,53 +37,7 @@ def update_strategy(db: Session, strategy_id: int, strategy: StrategyUpdate):
     
     db.commit()
     db.refresh(db_strategy)
+    logger.info(f"Updated strategy: {db_strategy.id}, sql_code: {db_strategy.sql_code}, python_code: {db_strategy.python_code}")
     return db_strategy
 
-def delete_strategy(db: Session, strategy_id: int):
-    db_strategy = get_strategy(db, strategy_id)
-    if not db_strategy:
-        return None
-    
-    db.delete(db_strategy)
-    db.commit()
-    return db_strategy
-
-def test_strategy(db: Session, strategy_id: int, test_data: dict):
-    db_strategy = get_strategy(db, strategy_id)
-    if not db_strategy:
-        return None
-    
-    # 创建临时Python文件
-    with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
-        # 写入策略代码
-        f.write(db_strategy.python_code)
-        temp_file = f.name
-    
-    try:
-        # 执行Python代码
-        result = subprocess.run(
-            ['python', temp_file],
-            input=json.dumps(test_data),
-            text=True,
-            capture_output=True,
-            timeout=30  # 30秒超时
-        )
-        
-        return {
-            'stdout': result.stdout,
-            'stderr': result.stderr,
-            'status': 'success' if result.returncode == 0 else 'error'
-        }
-    except subprocess.TimeoutExpired:
-        return {
-            'status': 'error',
-            'message': '执行超时'
-        }
-    except Exception as e:
-        return {
-            'status': 'error',
-            'message': str(e)
-        }
-    finally:
-        # 清理临时文件
-        os.unlink(temp_file) 
+  ## ... existing code ... 
